@@ -1,5 +1,5 @@
 import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
-import { checkAndCreateFolder, normalizeFilename } from './helpers';
+import { checkAndCreateFolder, normalizeFilename, pathJoin } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import YoutubeParser from './parsers/YoutubeParser';
@@ -90,6 +90,15 @@ export default class ReadItLaterPlugin extends Plugin {
         let filePath;
         fileName = normalizeFilename(fileName);
         await checkAndCreateFolder(this.app.vault, this.settings.inboxDir);
+
+        if (fileName.includes('/')) {
+            const splitPath = fileName.split('/');
+            const dirNamePart = splitPath[0];
+            const fileNamePart = normalizeFilename(splitPath[1]);
+            fileName = pathJoin(dirNamePart, fileNamePart);
+            console.log('path', fileName);
+            await checkAndCreateFolder(this.app.vault, pathJoin(this.settings.inboxDir, dirNamePart));
+        }
 
         if (this.settings.inboxDir) {
             filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
